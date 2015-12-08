@@ -1,8 +1,12 @@
 package com.example.ahsankhan.sunshine;
 
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.text.format.Time;
 import android.util.Log;
@@ -12,8 +16,12 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -60,6 +68,15 @@ public class ForecastFragment extends Fragment {
 				     new ArrayList<String>());
 	ListView listView = (ListView) rootView.findViewById(R.id.listview_forecast);
 	listView.setAdapter(adapter);
+	listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+		@Override
+		public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+		    String item = ((TextView)view).getText().toString();
+		    Intent detailIntent = new Intent(getActivity(), DetailActivity.class)
+                        .putExtra(Intent.EXTRA_TEXT, item);
+		    startActivity(detailIntent);
+		}
+	    });
 
 	return rootView;
     }
@@ -79,7 +96,13 @@ public class ForecastFragment extends Fragment {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_refresh) {
-	    new FetchWeatherTask().execute();
+	    SharedPreferences preferences = PreferenceManager
+		.getDefaultSharedPreferences(getActivity());
+	    String location = 
+		preferences.getString(getString(R.string.pref_location_key), 
+				      "98034");
+
+	    new FetchWeatherTask().execute(location);
             return true;
         }
 

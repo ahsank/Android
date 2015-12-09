@@ -1,5 +1,6 @@
 package com.example.ahsankhan.popularmovies;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -11,9 +12,13 @@ import android.view.MenuItem;
 
 public class MainActivity extends AppCompatActivity {
 
+    private String mSortBy;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mSortBy = Utility.getPreferredSortOrder(this);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -35,9 +40,30 @@ public class MainActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+	    Intent settingIntent =
+                new Intent(this, SettingsActivity.class);
+	    startActivity(settingIntent);
+
             return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        String sortBy = Utility.getPreferredSortOrder( this );
+        if (sortBy == null || sortBy.equals(mSortBy)) return;
+
+        // update the location in our second pane using the fragment manager
+        MainActivityFragment maf = (MainActivityFragment)getSupportFragmentManager()
+                .findFragmentById(R.id.fragment_main);
+        if ( null != maf ) maf.updateView();
+
+        // DetailFragment df = (DetailFragment)getSupportFragmentManager().findFragmentByTag(DETAILFRAGMENT_TAG);
+        // if ( null != df ) df.onLocationChanged(location);
+
+        mSortBy = sortBy;
     }
 }

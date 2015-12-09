@@ -1,8 +1,10 @@
 package com.example.ahsankhan.popularmovies;
 
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,6 +24,8 @@ import java.util.List;
  */
 public class MainActivityFragment extends Fragment {
 
+    private MovieTileAdapter movieTilesAdapter = null;
+
     public MainActivityFragment() {
     }
 
@@ -29,22 +33,32 @@ public class MainActivityFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-        final MovieTileAdapter movietilesAdapter = new MovieTileAdapter(getActivity(),
+        this.movieTilesAdapter = new MovieTileAdapter(getActivity(),
                 new ArrayList<MovieTile>());
 
         // Get a reference to the ListView, and attach this adapter to it.
         GridView gridView = (GridView) rootView.findViewById(R.id.movies_grid);
-        gridView.setAdapter(movietilesAdapter);
+        gridView.setAdapter(this.movieTilesAdapter);
+        updateView();
+
+        return rootView;
+    }
+
+    public void updateView() {
+        SharedPreferences preferences = PreferenceManager
+                .getDefaultSharedPreferences(getActivity());
+        String sort_by =
+                preferences.getString(getString(R.string.pref_sort_by_key),
+                        getString(R.string.pref_sort_by_default));
+
         new FetchMovieTask() {
             @Override
             protected void onPostExecute(MovieTile[] result) {
                 if (result == null) return;
-                movietilesAdapter.clear();
-                movietilesAdapter.addAll(result);
+                MainActivityFragment.this.movieTilesAdapter.clear();
+                MainActivityFragment.this.movieTilesAdapter.addAll(result);
             }
-        }.execute();
-
-        return rootView;
+        }.execute(sort_by);
     }
 
     public static class MovieTileAdapter extends ArrayAdapter<MovieTile> {

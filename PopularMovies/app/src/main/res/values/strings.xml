@@ -1,4 +1,26 @@
 <resources>
     <string name="app_name">PopularMovies</string>
     <string name="action_settings">Settings</string>
+    <string name="title_activity_settings">Settings</string>
+
+    <!-- Strings related to Settings -->
+
+    <!-- Example General settings -->
+    <string name="pref_header_general">General</string>
+
+    <string name="pref_title_sort_by">Sort by</string>
+    <string-array name="sort_by_list_titles">
+        <item>By Popularity</item>
+        <item>By Rating</item>
+    </string-array>
+    <string-array name="sort_by_list_values">
+        <item>popularity.desc</item>
+        <item>rating.desc</item>
+    </string-array>
+    <!-- Key name for storing sort by in SharedPreferences [CHAR LIMIT=NONE] -->
+    <string name="pref_sort_by_key" translatable="false">sort_by</string>
+
+    <!-- Default sort by value for location preference [CHAR LIMIT=NONE] -->
+    <string name="pref_sort_by_default" translatable="false">popularity.desc</string>
+
 </resources>

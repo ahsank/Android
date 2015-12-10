@@ -28,6 +28,8 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.ahsankhan.popularmovies.MainActivity" />
         </activity>
+        <activity android:name=".MovieDetailActivity" >
+        </activity>
     </application>
 
 </manifest>

@@ -20,7 +20,7 @@ public class DetailActivityFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
-	    TextView textView = (TextView)rootView.findViewById(R.id.forecast_detail_textview);
+ 	    TextView textView = (TextView)rootView.findViewById(R.id.forecast_detail_textview);
 	    textView.setText(getActivity().getIntent().getStringExtra(Intent.EXTRA_TEXT));
         return rootView;
     }

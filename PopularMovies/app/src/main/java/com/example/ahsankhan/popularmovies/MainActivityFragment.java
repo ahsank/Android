@@ -1,6 +1,7 @@
 package com.example.ahsankhan.popularmovies;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
@@ -8,6 +9,7 @@ import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
@@ -32,13 +34,25 @@ public class MainActivityFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_main,
+                                         container, false);
         this.movieTilesAdapter = new MovieTileAdapter(getActivity(),
                 new ArrayList<MovieTile>());
 
         // Get a reference to the ListView, and attach this adapter to it.
         GridView gridView = (GridView) rootView.findViewById(R.id.movies_grid);
         gridView.setAdapter(this.movieTilesAdapter);
+ 	gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView<?> adapterView,
+                                View view, int i, long l) {
+            Intent detailIntent = new Intent(getActivity(),
+                    MovieDetailActivity.class)
+                    .putExtra(Intent.EXTRA_TEXT, "movie_id");
+            startActivity(detailIntent);
+        }
+    });
+
         updateView();
 
         return rootView;

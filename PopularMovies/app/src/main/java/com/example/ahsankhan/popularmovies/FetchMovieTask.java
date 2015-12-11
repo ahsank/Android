@@ -1,6 +1,5 @@
 package com.example.ahsankhan.popularmovies;
 
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -8,13 +7,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 
 /**
  * Created by ahsankhan on 12/7/15.
@@ -25,71 +22,36 @@ public class FetchMovieTask extends AsyncTask<String, Void, MovieTile[]> {
     private final String LOG_TAG = FetchMovieTask.class.getSimpleName();
     final String MOVIEDB_URL = "http://api.themoviedb.org/3/";
     final String MOVIE_DISCOVER_BASE_URL = MOVIEDB_URL + "discover/movie?";
+    final String MOVIE_DETAIL_BASE_URL = MOVIEDB_URL + "movie/";
 
     final String API_KEY_PARAM = "api_key";
     final String SORT_PARAM="sort_by";
 
     @Override
     protected MovieTile[] doInBackground(String...params) {
-        HttpURLConnection urlConnection = null;
-        BufferedReader reader = null;
-        String movieJsonStr = null;
-        final String sort_by = params[0];
-
-        try {
-            // Construct the URL for the themoviedb query
-            Uri builtUri = Uri.parse(MOVIE_DISCOVER_BASE_URL)
-                .buildUpon()
-                .appendQueryParameter(SORT_PARAM, sort_by)
-                .appendQueryParameter(API_KEY_PARAM,
-                                      BuildConfig.THE_MOVIE_DB_API_KEY)
-                .build();
-            String serverUrl = builtUri.toString();
-            URL url = new URL(serverUrl);
-
-            urlConnection = (HttpURLConnection) url.openConnection();
-            urlConnection.setRequestMethod("GET");
-            urlConnection.connect();
-
-            // Read the input stream into a String
-            InputStream inputStream = urlConnection.getInputStream();
-            StringBuffer buffer = new StringBuffer();
-            if (inputStream == null) {
-                // Nothing to do.
-                return null;
+        if (params[0] == "discover") {
+            final String sort_by = params[1];
+            String movieJsonStr = NetworkUtility.FetchJson(
+                MOVIE_DISCOVER_BASE_URL,
+                new String[]{SORT_PARAM, API_KEY_PARAM},
+                new String[]{sort_by, BuildConfig.THE_MOVIE_DB_API_KEY});
+            try {
+                return getMovieListFromJson(movieJsonStr);
+            } catch(final JSONException e) {
+                Log.e(LOG_TAG, "Error parsing json", e);
             }
-            reader = new BufferedReader(new InputStreamReader(inputStream));
-
-            String line;
-            while ((line = reader.readLine()) != null) {
-                    buffer.append(line + "\n");
+        } else if (params[0] == "detail") {
+            final String movie_id = params[1];
+  
+          String movieJsonStr = NetworkUtility.FetchJson(
+              MOVIE_DETAIL_BASE_URL + movie_id + "?",
+              new String[] {API_KEY_PARAM},
+              new String[] {BuildConfig.THE_MOVIE_DB_API_KEY});
+            try {
+                return getMovieDetailFromJson(movieJsonStr);
+            } catch(final JSONException e) {
+                Log.e(LOG_TAG, "Error parsing json", e);
             }
-
-            if (buffer.length() == 0) {
-                // Stream was empty.  No point in parsing.
-                return null;
-            }
-            movieJsonStr = buffer.toString();
-        } catch (IOException e) {
-            Log.e(LOG_TAG, "Error ", e);
-            return null;
-        } finally {
-            if (urlConnection != null) {
-                urlConnection.disconnect();
-            }
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (final IOException e) {
-                    Log.e(LOG_TAG, "Error closing stream", e);
-                }
-            }
-        }
-        
-        try {
-            return getMovieDataFromJson(movieJsonStr);
-        } catch(final JSONException e) {
-            Log.e(LOG_TAG, "Error parsing json", e);
         }
         return null;
     }
@@ -108,12 +70,13 @@ public class FetchMovieTask extends AsyncTask<String, Void, MovieTile[]> {
         } ], "total_pages":12647, "total_results":252936 }
 
      */
-    private MovieTile[] getMovieDataFromJson(String moviesJsonStr)
+    private MovieTile[] getMovieListFromJson(String moviesJsonStr)
         throws JSONException {
         final String TITLE = "title";
         final String MOVIE_ID = "id";
         final String RESULTS = "results";
-
+        
+        if (moviesJsonStr == null) return null;
         JSONObject moviesJson = new JSONObject(moviesJsonStr);
         JSONArray resultsArray = moviesJson.getJSONArray(RESULTS);
 	if (resultsArray.length() == 0) return null;
@@ -133,4 +96,66 @@ public class FetchMovieTask extends AsyncTask<String, Void, MovieTile[]> {
 		return "http://image.tmdb.org/t/p/w185/" +
             movieJson.getString(POSTER_PATH);
     }
+
+    /*
+      Movie detail Json format:
+
+      { "adult":false,
+      "backdrop_path":"/qjn3fzCAHGfl0CzeUlFbjrsmu4c.jpg",
+   "belongs_to_collection":{ "id":131635, "name":"The Huger Games
+   Collection", "poster_path":"/cEBNDEMGqvSvU0knEv9Wl3dk5kv.jpg",
+   "backdrop_path":"/lWZB4VFSlU292oJ3ZAzAzPi9GU0.jpg" },
+   "budget":125000000,
+    "genres":[ { "id":18, "name":"Drama" }, {
+   "id":12, "name":"Adventure" }, { "id":28, "name":"Action" } ],
+   "homepage":"http://www.thehungergames.movie/", "id":131634,
+   "imdb_id":"tt1951266", "original_language":"en",
+   "original_title":"The Hunger Games: Mockingjay - Part 2",
+   "overview":"With the nation of Panem in a full scale war, Katniss
+   confronts .....", "popularity":23.800512,
+   "poster_path":"/nN4cEJMHJHbJBsp3vvvhtNWLGqg.jpg",
+   "production_companies":[ { "name":"Studio Babelsberg", "id":264 },
+   { "name":"Lionsgate", "id":1632 }, { "name":"Color Force",
+   "id":5420 } ], 
+   "production_countries":[ { "iso_3166_1":"US",
+   "name":"United States of America" } ],
+    "release_date":"2015-11-19",
+   "revenue":101025000, "runtime":136, 
+   "spoken_languages":[ {
+   "iso_639_1":"en", "name":"English" } ]
+,   "status":"Released",
+   "tagline":"The fire will burn forever.", "title":"The Hunger Games:
+   Mockingjay - Part 2", "video":false, "vote_average":7.1,
+   "vote_count":556 }
+
+     */
+   private MovieTile[] getMovieDetailFromJson(String moviesJsonStr)
+        throws JSONException {
+       if (moviesJsonStr == null) return null;
+       JSONObject movieJson = new JSONObject(moviesJsonStr);
+       MovieTile[] movieTiles = new MovieTile[1];
+       movieTiles[0] = new MovieTile(movieJson.getString("id"),
+                                     movieJson.getString("title"),
+                                     getFullImagePath(movieJson));
+       movieTiles[0].setMovieDetails(
+           getYear(movieJson.getString("release_date")),
+           movieJson.getString("vote_average"),
+           movieJson.getString("overview"));
+            
+       return movieTiles;
+    }
+
+   private String getYear(String date) {
+       SimpleDateFormat  format = new SimpleDateFormat("yyyy-MM-dd");
+       Calendar cal = Calendar.getInstance();
+        try {
+            cal.setTime(format.parse(date));
+            return Integer.toString(cal.get(Calendar.YEAR));
+        } catch (ParseException e) {
+            Log.v(LOG_TAG, "Error parsing date " + date, e);
+        }
+        return "";
+
+   }
+                                      
 }

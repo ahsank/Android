@@ -24,7 +24,7 @@ public class MovieDetailFragment extends Fragment {
     TextView movieYear = null;
     TextView movieRating = null;
     TextView movieSynopsis = null;
-    String myMovieId = null;
+    String movieId = null;
 
     public MovieDetailFragment() {
         // Required empty public constructor
@@ -45,16 +45,26 @@ public class MovieDetailFragment extends Fragment {
             (TextView) rootView.findViewById(R.id.detail_movie_rating);
         movieSynopsis =
             (TextView) rootView.findViewById(R.id.detail_movie_synopsis);;
-	myMovieId =
+	this.movieId =
             getActivity().getIntent().getStringExtra(Intent.EXTRA_TEXT);
         updateDetail();
         return rootView;
     }
 
     void updateDetail() {
-        String posterPath =
-            "http://image.tmdb.org/t/p/w185/D6e8RJf2qUstnfkTslTXNTUAlT.jpg";
-        Picasso.with(getActivity()).load(posterPath).into(moviePoster);
+        new FetchMovieTask() {
+            @Override
+            protected void onPostExecute(MovieTile[] result) {
+                if (result == null || result.length == 0) return;
+                MovieTile movie = result[0];
+                MovieDetailFragment.this.movieTitle.setText(movie.title);
+                Picasso.with(getActivity()).load(movie.posterPath).into(
+                    MovieDetailFragment.this.moviePoster);
+                MovieDetailFragment.this.movieYear.setText(movie.releaseYear);
+                MovieDetailFragment.this.movieRating.setText(movie.movieRating);
+                MovieDetailFragment.this.movieSynopsis.setText(movie.movieSummary);
+            }
+        }.execute("detail", movieId);
     }
 
 }

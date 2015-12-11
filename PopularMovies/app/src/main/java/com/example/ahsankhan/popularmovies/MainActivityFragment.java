@@ -45,10 +45,12 @@ public class MainActivityFragment extends Fragment {
  	gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> adapterView,
-                                View view, int i, long l) {
+                                View view, int position, long l) {
+            MovieTile movieTile = movieTilesAdapter.getItem(position);
+
             Intent detailIntent = new Intent(getActivity(),
                     MovieDetailActivity.class)
-                    .putExtra(Intent.EXTRA_TEXT, "movie_id");
+                    .putExtra(Intent.EXTRA_TEXT, movieTile.id);
             startActivity(detailIntent);
         }
     });
@@ -72,11 +74,12 @@ public class MainActivityFragment extends Fragment {
                 MainActivityFragment.this.movieTilesAdapter.clear();
                 MainActivityFragment.this.movieTilesAdapter.addAll(result);
             }
-        }.execute(sort_by);
+        }.execute("discover", sort_by);
     }
 
     public static class MovieTileAdapter extends ArrayAdapter<MovieTile> {
-        private static final String LOG_TAG = MovieTileAdapter.class.getSimpleName();
+        private static final String LOG_TAG =
+            MovieTileAdapter.class.getSimpleName();
 
         public MovieTileAdapter(Activity context, List<MovieTile> movieTiles) {
             super(context, 0, movieTiles);

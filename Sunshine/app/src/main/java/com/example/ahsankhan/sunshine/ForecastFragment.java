@@ -68,7 +68,7 @@ public class ForecastFragment extends Fragment {
 				     new ArrayList<String>());
 	ListView listView = (ListView) rootView.findViewById(R.id.listview_forecast);
 	listView.setAdapter(adapter);
-	listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+ 	listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 		@Override
 		public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
 		    String item = ((TextView)view).getText().toString();

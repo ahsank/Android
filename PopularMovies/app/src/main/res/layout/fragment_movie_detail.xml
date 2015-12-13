@@ -7,21 +7,18 @@
     <TextView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:background="#4DB6AC"
-        android:textColor="#FFFFFF"
-        android:padding="16dp"
+        style="@style/TitleText"
         tools:text="Fantastic Four"
-        android:textAppearance="?android:attr/textAppearanceLarge"
         android:id="@+id/detail_movie_title" />
 
     <LinearLayout
         android:orientation="horizontal"
-        android:padding="16dp"
+        android:padding="@dimen/movie_detail_margin"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-
+        <!-- Poster -->
         <ImageView
-            android:layout_width="185dp"
+            android:layout_width="@dimen/image_width"
             android:layout_height="wrap_content"
             android:scaleType="centerCrop"
             android:id="@+id/detail_movie_poster" />
@@ -30,24 +27,28 @@
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginLeft="16dp"
+            android:layout_weight="1"
+            android:gravity="center" 
+            android:layout_marginLeft="@dimen/movie_detail_margin"
             >
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/detail_movie_year" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+          <!-- Year -->
+          <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              style="?android:attr/textAppearanceLarge"
+              android:id="@+id/detail_movie_year" />
+          <!-- Rating -->
+          <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
                 android:id="@+id/detail_movie_rating" />
         </LinearLayout>
     </LinearLayout>
 
+    <!-- Description -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="@dimen/movie_detail_margin"
         android:id="@+id/detail_movie_synopsis" />
 </LinearLayout>

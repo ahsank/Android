@@ -2,9 +2,9 @@ package com.example.ahsankhan.popularmovies;
 
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-// import android.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,7 +15,7 @@ import com.squareup.picasso.Picasso;
 
 
 /**
- * A simple {@link Fragment} subclass.
+ *  A {@link Fragment} subclass to show movie details.
  */
 public class MovieDetailFragment extends Fragment {
 
@@ -52,19 +52,23 @@ public class MovieDetailFragment extends Fragment {
     }
 
     void updateDetail() {
-        new FetchMovieTask() {
-            @Override
-            protected void onPostExecute(MovieTile[] result) {
-                if (result == null || result.length == 0) return;
-                MovieTile movie = result[0];
-                MovieDetailFragment.this.movieTitle.setText(movie.title);
-                Picasso.with(getActivity()).load(movie.posterPath).into(
-                    MovieDetailFragment.this.moviePoster);
-                MovieDetailFragment.this.movieYear.setText(movie.releaseYear);
-                MovieDetailFragment.this.movieRating.setText(movie.movieRating);
-                MovieDetailFragment.this.movieSynopsis.setText(movie.movieSummary);
-            }
-        }.execute("detail", movieId);
+        new FetchMovieDetailTask().execute(movieId);
     }
 
+    private class FetchMovieDetailTask extends AsyncTask<String, Void, MovieTile> {
+        @Override
+        protected MovieTile doInBackground(String...params) {
+            return TheMovieDBUtility.getDetail(params[0]);
+        }
+        @Override
+        protected void onPostExecute(MovieTile movie) {
+            if (movie == null ) return;
+            MovieDetailFragment.this.movieTitle.setText(movie.title);
+            Picasso.with(getActivity()).load(movie.posterPath).into(
+                MovieDetailFragment.this.moviePoster);
+            MovieDetailFragment.this.movieYear.setText(movie.releaseYear);
+            MovieDetailFragment.this.movieRating.setText(movie.movieRating);
+            MovieDetailFragment.this.movieSynopsis.setText(movie.movieSummary);
+        }
+    }
 }

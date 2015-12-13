@@ -1,6 +1,5 @@
 package com.example.ahsankhan.popularmovies;
 
-import android.os.AsyncTask;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -14,46 +13,42 @@ import java.util.Calendar;
 import java.util.Date;
 
 /**
- * Created by ahsankhan on 12/7/15.
+ * Created by ahsankhan on 12/13/15.
  * Based on Udacity Sunshine App.
  */
+public class TheMovieDBUtility {
+    static private final String LOG_TAG = TheMovieDBUtility.class.getSimpleName();
+    static final String MOVIEDB_URL = "http://api.themoviedb.org/3/";
+    static final String MOVIE_DISCOVER_BASE_URL = MOVIEDB_URL + "discover/movie?";
+    static final String MOVIE_DETAIL_BASE_URL = MOVIEDB_URL + "movie/";
 
-public class FetchMovieTask extends AsyncTask<String, Void, MovieTile[]> {
-    private final String LOG_TAG = FetchMovieTask.class.getSimpleName();
-    final String MOVIEDB_URL = "http://api.themoviedb.org/3/";
-    final String MOVIE_DISCOVER_BASE_URL = MOVIEDB_URL + "discover/movie?";
-    final String MOVIE_DETAIL_BASE_URL = MOVIEDB_URL + "movie/";
+    static final String API_KEY_PARAM = "api_key";
+    static final String SORT_PARAM="sort_by";
 
-    final String API_KEY_PARAM = "api_key";
-    final String SORT_PARAM="sort_by";
-
-    @Override
-    protected MovieTile[] doInBackground(String...params) {
-        if (params[0] == "discover") {
-            final String sort_by = params[1];
-            String movieJsonStr = NetworkUtility.FetchJson(
-                MOVIE_DISCOVER_BASE_URL,
-                new String[]{SORT_PARAM, API_KEY_PARAM},
-                new String[]{sort_by, BuildConfig.THE_MOVIE_DB_API_KEY});
-            try {
-                return getMovieListFromJson(movieJsonStr);
-            } catch(final JSONException e) {
-                Log.e(LOG_TAG, "Error parsing json", e);
-            }
-        } else if (params[0] == "detail") {
-            final String movie_id = params[1];
-  
-          String movieJsonStr = NetworkUtility.FetchJson(
-              MOVIE_DETAIL_BASE_URL + movie_id + "?",
-              new String[] {API_KEY_PARAM},
-              new String[] {BuildConfig.THE_MOVIE_DB_API_KEY});
-            try {
-                return getMovieDetailFromJson(movieJsonStr);
-            } catch(final JSONException e) {
-                Log.e(LOG_TAG, "Error parsing json", e);
-            }
+    static MovieTile[] discover(String sortBy) {
+        String movieJsonStr = NetworkUtility.FetchJson(
+            MOVIE_DISCOVER_BASE_URL,
+            new String[]{SORT_PARAM, API_KEY_PARAM},
+            new String[]{sortBy, BuildConfig.THE_MOVIE_DB_API_KEY});
+        try {
+            return getMovieListFromJson(movieJsonStr);
+        } catch(final JSONException e) {
+            Log.e(LOG_TAG, "Error parsing json", e);
         }
         return null;
+    }
+    
+    static MovieTile getDetail(String movieId) {
+        String movieJsonStr = NetworkUtility.FetchJson(
+            MOVIE_DETAIL_BASE_URL + movieId + "?",
+            new String[] {API_KEY_PARAM},
+            new String[] {BuildConfig.THE_MOVIE_DB_API_KEY});
+        try {
+            return getMovieDetailFromJson(movieJsonStr);
+        } catch(final JSONException e) {
+            Log.e(LOG_TAG, "Error parsing json", e);
+        }
+        return null;    
     }
 
     /*
@@ -70,7 +65,7 @@ public class FetchMovieTask extends AsyncTask<String, Void, MovieTile[]> {
         } ], "total_pages":12647, "total_results":252936 }
 
      */
-    private MovieTile[] getMovieListFromJson(String moviesJsonStr)
+    static private MovieTile[] getMovieListFromJson(String moviesJsonStr)
         throws JSONException {
         final String TITLE = "title";
         final String MOVIE_ID = "id";
@@ -90,10 +85,10 @@ public class FetchMovieTask extends AsyncTask<String, Void, MovieTile[]> {
 	return movieTiles;
     }
 
-    private String getFullImagePath(JSONObject movieJson)
+    static private String getFullImagePath(JSONObject movieJson)
 		throws JSONException {
-		final String POSTER_PATH = "poster_path";
-		return "http://image.tmdb.org/t/p/w185/" +
+        final String POSTER_PATH = "poster_path";
+        return "http://image.tmdb.org/t/p/w185/" +
             movieJson.getString(POSTER_PATH);
     }
 
@@ -129,23 +124,20 @@ public class FetchMovieTask extends AsyncTask<String, Void, MovieTile[]> {
    "vote_count":556 }
 
      */
-   private MovieTile[] getMovieDetailFromJson(String moviesJsonStr)
+   static private MovieTile getMovieDetailFromJson(String moviesJsonStr)
         throws JSONException {
        if (moviesJsonStr == null) return null;
        JSONObject movieJson = new JSONObject(moviesJsonStr);
-       MovieTile[] movieTiles = new MovieTile[1];
-       movieTiles[0] = new MovieTile(movieJson.getString("id"),
-                                     movieJson.getString("title"),
-                                     getFullImagePath(movieJson));
-       movieTiles[0].setMovieDetails(
-           getYear(movieJson.getString("release_date")),
-           movieJson.getString("vote_average"),
-           movieJson.getString("overview"));
-            
-       return movieTiles;
+       MovieTile movieTile = new MovieTile(movieJson.getString("id"),
+                                           movieJson.getString("title"),
+                                           getFullImagePath(movieJson));
+       movieTile.setMovieDetails(getYear(movieJson.getString("release_date")),
+                                 movieJson.getString("vote_average") + "/10",
+                                 movieJson.getString("overview"));
+       return movieTile;
     }
 
-   private String getYear(String date) {
+   static private String getYear(String date) {
        SimpleDateFormat  format = new SimpleDateFormat("yyyy-MM-dd");
        Calendar cal = Calendar.getInstance();
         try {
@@ -155,7 +147,5 @@ public class FetchMovieTask extends AsyncTask<String, Void, MovieTile[]> {
             Log.v(LOG_TAG, "Error parsing date " + date, e);
         }
         return "";
-
    }
-                                      
 }

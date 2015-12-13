@@ -14,4 +14,10 @@
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
+    <style name="TitleText">
+      <item name="android:background">@color/colorTitleBackground</item>
+      <item name="android:textColor">@color/colorTitleForeground</item>
+      <item name="android:padding">@dimen/movie_detail_margin</item>
+      <item name="android:textSize">@dimen/text_size_title</item>
+    </style>
 </resources>

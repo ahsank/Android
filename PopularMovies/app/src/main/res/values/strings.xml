@@ -15,7 +15,7 @@
     </string-array>
     <string-array name="sort_by_list_values">
         <item>popularity.desc</item>
-        <item>rating.desc</item>
+        <item>vote_average.desc</item>
     </string-array>
     <!-- Key name for storing sort by in SharedPreferences [CHAR LIMIT=NONE] -->
     <string name="pref_sort_by_key" translatable="false">sort_by</string>

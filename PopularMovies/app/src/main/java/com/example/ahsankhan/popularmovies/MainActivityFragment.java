@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.v4.app.Fragment;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
@@ -67,14 +68,7 @@ public class MainActivityFragment extends Fragment {
                 preferences.getString(getString(R.string.pref_sort_by_key),
                         getString(R.string.pref_sort_by_default));
 
-        new FetchMovieTask() {
-            @Override
-            protected void onPostExecute(MovieTile[] result) {
-                if (result == null) return;
-                MainActivityFragment.this.movieTilesAdapter.clear();
-                MainActivityFragment.this.movieTilesAdapter.addAll(result);
-            }
-        }.execute("discover", sort_by);
+        new DiscoverMovieTask().execute(sort_by);
     }
 
     public static class MovieTileAdapter extends ArrayAdapter<MovieTile> {
@@ -98,13 +92,25 @@ public class MainActivityFragment extends Fragment {
             ImageView imageView =
 		(ImageView) convertView.findViewById(R.id.movie_image);
             Picasso.with(getContext()).load(movie.posterPath).into(imageView);
-            //iconView.setImageResource(androidFlavor.imageUrl);
 
             TextView versionNameView =
 		(TextView) convertView.findViewById(R.id.movie_text);
             versionNameView.setText(movie.title);
 
             return convertView;
+        }
+    }
+
+    private class DiscoverMovieTask extends AsyncTask<String, Void, MovieTile[]> {
+        @Override
+        protected MovieTile[] doInBackground(String...params) {
+            return TheMovieDBUtility.discover(params[0]);
+        }
+        @Override
+        protected void onPostExecute(MovieTile[] result) {
+            if (result == null) return;
+            MainActivityFragment.this.movieTilesAdapter.clear();
+            MainActivityFragment.this.movieTilesAdapter.addAll(result);
         }
     }
 }

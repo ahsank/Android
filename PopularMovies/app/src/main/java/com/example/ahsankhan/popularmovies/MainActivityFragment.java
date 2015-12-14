@@ -88,15 +88,19 @@ public class MainActivityFragment extends Fragment {
                 convertView = LayoutInflater.from(getContext()).inflate(
                         R.layout.movies_grid_item, parent, false);
             }
+            if (convertView == null) return convertView;
 
             ImageView imageView =
 		(ImageView) convertView.findViewById(R.id.movie_image);
-            Picasso.with(getContext()).load(movie.posterPath).into(imageView);
+            if (imageView != null) {
+                Picasso.with(getContext()).load(movie.posterPath).into(imageView);
+            }
 
-            TextView versionNameView =
+            TextView movieTitleView =
 		(TextView) convertView.findViewById(R.id.movie_text);
-            versionNameView.setText(movie.title);
-
+            if (movieTitleView != null) {
+                movieTitleView.setText(movie.title);
+            }
             return convertView;
         }
     }

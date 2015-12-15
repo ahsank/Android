@@ -6,7 +6,7 @@ Build Instruction
 Before Build get themoviedb.com Apikey and add following line to the file
 `~/.graddle/graddle.properties`
 
-    MyMovieDBApiKey="42703cf8cb2793a32227cf33019bf7c2"
+    MyMovieDBApiKey="your app key"
 
 Build the project:
 

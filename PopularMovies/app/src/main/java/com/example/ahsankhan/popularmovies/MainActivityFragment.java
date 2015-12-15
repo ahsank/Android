@@ -43,22 +43,42 @@ public class MainActivityFragment extends Fragment {
         // Get a reference to the ListView, and attach this adapter to it.
         GridView gridView = (GridView) rootView.findViewById(R.id.movies_grid);
         gridView.setAdapter(this.movieTilesAdapter);
- 	gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-        @Override
-        public void onItemClick(AdapterView<?> adapterView,
-                                View view, int position, long l) {
-            MovieTile movieTile = movieTilesAdapter.getItem(position);
+        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView,
+                                    View view, int position, long l) {
+                MovieTile movieTile = movieTilesAdapter.getItem(position);
 
-            Intent detailIntent = new Intent(getActivity(),
-                    MovieDetailActivity.class)
-                    .putExtra(Intent.EXTRA_TEXT, movieTile.id);
-            startActivity(detailIntent);
+                Intent detailIntent = new Intent(getActivity(),
+                        MovieDetailActivity.class)
+                        .putExtra(Intent.EXTRA_TEXT, movieTile.id);
+                startActivity(detailIntent);
+            }
+        });
+
+        if (savedInstanceState == null || !savedInstanceState.containsKey("key")) {
+            updateView();
+        } else {
+            ArrayList<MovieTile> list =
+                    savedInstanceState.getParcelableArrayList("key");
+            movieTilesAdapter.addAll(list);
         }
-    });
 
-        updateView();
 
         return rootView;
+    }
+
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        if (movieTilesAdapter != null) {
+            ArrayList<MovieTile> items = new ArrayList<>();
+            for (int i = 0; i < movieTilesAdapter.getCount(); i++) {
+                items.add(movieTilesAdapter.getItem(i));
+            }
+            outState.putParcelableArrayList("key", items);
+        }
+        super.onSaveInstanceState(outState);
     }
 
     public void updateView() {
@@ -88,12 +108,15 @@ public class MainActivityFragment extends Fragment {
                 convertView = LayoutInflater.from(getContext()).inflate(
                         R.layout.movies_grid_item, parent, false);
             }
-            if (convertView == null) return convertView;
+            if (convertView == null) return null;
 
             ImageView imageView =
 		(ImageView) convertView.findViewById(R.id.movie_image);
             if (imageView != null) {
-                Picasso.with(getContext()).load(movie.posterPath).into(imageView);
+                // Todo: Ahsan: Add placeholder and error image.
+                Picasso.with(getContext())
+                        .load(movie.posterPath)
+                        .into(imageView);
             }
 
             TextView movieTitleView =
@@ -103,6 +126,7 @@ public class MainActivityFragment extends Fragment {
             }
             return convertView;
         }
+
     }
 
     private class DiscoverMovieTask extends AsyncTask<String, Void, MovieTile[]> {

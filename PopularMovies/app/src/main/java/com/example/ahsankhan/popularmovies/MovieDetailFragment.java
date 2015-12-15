@@ -44,8 +44,8 @@ public class MovieDetailFragment extends Fragment {
         movieRating =
             (TextView) rootView.findViewById(R.id.detail_movie_rating);
         movieSynopsis =
-            (TextView) rootView.findViewById(R.id.detail_movie_synopsis);;
-	this.movieId =
+                (TextView) rootView.findViewById(R.id.detail_movie_synopsis);
+        this.movieId =
             getActivity().getIntent().getStringExtra(Intent.EXTRA_TEXT);
         updateDetail();
         return rootView;

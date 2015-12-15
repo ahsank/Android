@@ -1,59 +1,60 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.example.ahsankhan.popularmovies.MovieDetailFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true">
-  <LinearLayout
-      android:layout_width="match_parent"
-      android:layout_height="match_parent"
-      android:orientation="vertical">
-    <TextView
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        style="@style/TitleText"
-        tools:text="Fantastic Four"
-        android:id="@+id/detail_movie_title" />
+    android:fillViewport="true"
+    tools:context="com.example.ahsankhan.popularmovies.MovieDetailFragment">
 
     <LinearLayout
-        android:orientation="horizontal"
-        android:padding="@dimen/movie_detail_margin"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <!-- Poster -->
-        <ImageView
-            android:layout_width="@dimen/image_width"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/detail_movie_title"
+            style="@style/TitleText"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:scaleType="centerCrop"
-            android:id="@+id/detail_movie_poster" />
+            tools:text="Fantastic Four" />
 
         <LinearLayout
-            android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center" 
-            android:layout_marginLeft="@dimen/movie_detail_margin"
-            >
-          <!-- Year -->
-          <TextView
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              style="?android:attr/textAppearanceLarge"
-              android:id="@+id/detail_movie_year" />
-          <!-- Rating -->
-          <TextView
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-                android:id="@+id/detail_movie_rating" />
-        </LinearLayout>
-    </LinearLayout>
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="@dimen/movie_detail_margin">
+            <!-- Poster -->
+            <ImageView
+                android:id="@+id/detail_movie_poster"
+                android:layout_width="@dimen/image_width"
+                android:layout_height="185dp"
+                android:scaleType="centerCrop" />
 
-    <!-- Description -->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/movie_detail_margin"
-        android:id="@+id/detail_movie_synopsis" />
-  </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="@dimen/movie_detail_margin"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+                <!-- Year -->
+                <TextView
+                    android:id="@+id/detail_movie_year"
+                    style="?android:attr/textAppearanceLarge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+                <!-- Rating -->
+                <TextView
+                    android:id="@+id/detail_movie_rating"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Description -->
+        <TextView
+            android:id="@+id/detail_movie_synopsis"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/movie_detail_margin" />
+    </LinearLayout>
 </ScrollView>

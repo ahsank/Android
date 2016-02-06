@@ -17,13 +17,12 @@ import java.util.Date;
  * Based on Udacity Sunshine App.
  */
 public class TheMovieDBUtility {
-    static private final String LOG_TAG = TheMovieDBUtility.class.getSimpleName();
     static final String MOVIEDB_URL = "http://api.themoviedb.org/3/";
     static final String MOVIE_DISCOVER_BASE_URL = MOVIEDB_URL + "discover/movie?";
     static final String MOVIE_DETAIL_BASE_URL = MOVIEDB_URL + "movie/";
-
     static final String API_KEY_PARAM = "api_key";
     static final String SORT_PARAM="sort_by";
+    static private final String LOG_TAG = TheMovieDBUtility.class.getSimpleName();
 
     static MovieTile[] discover(String sortBy) {
         String movieJsonStr = NetworkUtility.FetchJson(
@@ -43,12 +42,23 @@ public class TheMovieDBUtility {
             MOVIE_DETAIL_BASE_URL + movieId + "?",
             new String[] {API_KEY_PARAM},
             new String[] {BuildConfig.THE_MOVIE_DB_API_KEY});
+        MovieTile movieTile = null;
         try {
-            return getMovieDetailFromJson(movieJsonStr);
+            movieTile = getMovieDetailFromJson(movieJsonStr);
+            movieTile.setTrailers(getTrailers(movieId));
         } catch(final JSONException e) {
             Log.e(LOG_TAG, "Error parsing json", e);
         }
-        return null;    
+        return movieTile;
+    }
+
+    static ArrayList<MovieTile.MovieTrailer> getTrailers(String movieId)
+            throws JSONException {
+        String trailerJsonStr = NetworkUtility.FetchJson(
+                MOVIE_DETAIL_BASE_URL + movieId + "/videos" + "?",
+                new String[]{API_KEY_PARAM},
+                new String[]{BuildConfig.THE_MOVIE_DB_API_KEY});
+        return getTrailersFromJson(trailerJsonStr);
     }
 
     /*
@@ -83,6 +93,55 @@ public class TheMovieDBUtility {
                                           getFullImagePath(movieJson));
         }
 	return movieTiles;
+    }
+
+    /* 
+       Json Format:
+
+       {
+         "id": 550,
+         "results": [
+           {
+           "id": "533ec654c3a36854480003eb",
+           "iso_639_1": "en",
+           "key": "SUXWAEX2jlg",
+           "name": "Trailer 1",
+           "site": "YouTube",
+           "size": 720,
+           "type": "Trailer"
+           }
+         ]
+       }
+     */
+    static private ArrayList<MovieTile.MovieTrailer> getTrailersFromJson(
+            String trailerResponse)
+            throws JSONException {
+        final String RESULTS = "results";
+        final String NAME = "name";
+        final String TYPE = "type";
+        final String TRAILER_TYPE = "trailer";
+        final String SITE = "site";
+        final String YOUTUBE_SITE = "youtube";
+        final String KEY = "key";
+        if (trailerResponse == null) return null;
+        JSONObject responseJson = new JSONObject(trailerResponse);
+        JSONArray results = responseJson.getJSONArray(RESULTS);
+        if (results.length() == 0) return null;
+        ArrayList<MovieTile.MovieTrailer> trailers
+                = new ArrayList<>();
+        for (int i = 0; i < results.length(); i++) {
+            JSONObject trailerJson = results.getJSONObject(i);
+            if (!TRAILER_TYPE.equalsIgnoreCase(trailerJson.getString(TYPE)) ||
+                    !YOUTUBE_SITE.equalsIgnoreCase(trailerJson.getString(SITE))) {
+                continue;
+            }
+            MovieTile.MovieTrailer trailer = new MovieTile.MovieTrailer(
+                    trailerJson.getString(NAME),
+                    trailerJson.getString(KEY));
+            trailers.add(trailer);
+        }
+        if (trailers.size() == 0) return null;
+        return trailers;
     }
 
     static private String getFullImagePath(JSONObject movieJson)

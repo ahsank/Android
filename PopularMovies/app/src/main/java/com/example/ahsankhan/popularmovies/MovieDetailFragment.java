@@ -2,10 +2,14 @@ package com.example.ahsankhan.popularmovies;
 
 
 import android.content.ActivityNotFoundException;
+import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,11 +18,13 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.support.v7.widget.CardView;
+
+import com.example.ahsankhan.popularmovies.data.MovieContract;
 import com.squareup.picasso.Picasso;
 
 
 /**
- *  A {@link Fragment} subclass to show movie details.
+ * A {@link Fragment} subclass to show movie details.
  */
 public class MovieDetailFragment extends Fragment {
 
@@ -32,18 +38,19 @@ public class MovieDetailFragment extends Fragment {
     TextView trailerText = null;
     String trailerKey = null;
     ImageButton playTrailerButton = null;
+    Boolean isInFavorite = false;
+    String movieName;
 
     public MovieDetailFragment() {
         // Required empty public constructor
     }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_movie_detail,
-                                         container, false);
+                container, false);
         movieTitle = (TextView) rootView.findViewById(R.id.detail_movie_title);
         moviePoster = (ImageView) rootView.findViewById(R.id.detail_movie_poster);
         movieYear = (TextView) rootView.findViewById(R.id.detail_movie_year);
@@ -68,8 +75,55 @@ public class MovieDetailFragment extends Fragment {
                 }
             }
         });
+        FloatingActionButton fab = (FloatingActionButton) rootView.findViewById(R.id.fab_favorite);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String status = isInFavorite ?
+                        "Removed from favorite" : "Added to favorite";
+                if (isInFavorite) {
+                    removeFromFavorite(movieId);
+                } else {
+                    addToFavorite(movieId, movieName);
+                }
+                isInFavorite = isFavoriteMovie(movieId);
+                Snackbar.make(view, status, Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+            }
+        });
         updateDetail();
         return rootView;
+    }
+
+    Boolean isFavoriteMovie(String movieId) {
+        // A cursor is your primary interface to the query results.
+        Cursor cursor = getContext().getContentResolver().query(
+                MovieContract.FavoriteEntry.CONTENT_URI,
+                null,   // projection
+                MovieContract.FavoriteEntry.COLUMN_MOVIE_ID + " = '" +
+                        movieId + "'",
+                null,   // Values for the "where" clause
+                null    // sort order
+        );
+        cursor.moveToFirst();
+        return !cursor.isAfterLast();
+    }
+
+    void addToFavorite(String movieId, String movieName) {
+        ContentValues values = new ContentValues();
+        values.put(MovieContract.FavoriteEntry.COLUMN_MOVIE_ID, movieId);
+        values.put(MovieContract.FavoriteEntry.COLUMN_MOVIE_NAME, movieName);
+        getContext().getContentResolver().insert(
+                MovieContract.FavoriteEntry.CONTENT_URI, values
+        );
+    }
+
+    void removeFromFavorite(String movieId) {
+        getContext().getContentResolver().delete(
+                MovieContract.FavoriteEntry.CONTENT_URI,
+                MovieContract.FavoriteEntry.COLUMN_MOVIE_ID + "=?",
+                new String[]{movieId}
+        );
     }
 
     void updateDetail() {
@@ -78,15 +132,16 @@ public class MovieDetailFragment extends Fragment {
 
     private class FetchMovieDetailTask extends AsyncTask<String, Void, MovieTile> {
         @Override
-        protected MovieTile doInBackground(String...params) {
+        protected MovieTile doInBackground(String... params) {
             return TheMovieDBUtility.getDetail(params[0]);
         }
+
         @Override
         protected void onPostExecute(MovieTile movie) {
-            if (movie == null ) return;
+            if (movie == null) return;
             MovieDetailFragment.this.movieTitle.setText(movie.title);
             Picasso.with(getActivity()).load(movie.posterPath).into(
-                MovieDetailFragment.this.moviePoster);
+                    MovieDetailFragment.this.moviePoster);
             MovieDetailFragment.this.movieYear.setText(movie.releaseYear);
             MovieDetailFragment.this.movieRating.setText(movie.movieRating);
             MovieDetailFragment.this.movieSynopsis.setText(movie.movieSummary);
@@ -95,6 +150,8 @@ public class MovieDetailFragment extends Fragment {
                 trailerText.setText(trailer.trailerName);
                 trailerKey = trailer.trailerKey;
             }
+            movieName = movie.title;
+            isInFavorite = isFavoriteMovie(movie.id);
         }
     }
 }

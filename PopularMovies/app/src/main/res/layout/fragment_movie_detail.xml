@@ -1,108 +1,121 @@
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
     tools:context="com.example.ahsankhan.popularmovies.MovieDetailFragment">
 
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
-
-        <TextView
-            android:id="@+id/detail_movie_title"
-            style="@style/TitleText"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            tools:text="Fantastic Four" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="@dimen/movie_detail_margin">
-            <!-- Poster -->
-            <ImageView
-                android:id="@+id/detail_movie_poster"
-                android:layout_width="@dimen/image_width"
-                android:layout_height="185dp"
-                android:scaleType="centerCrop" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginLeft="@dimen/movie_detail_margin"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:orientation="vertical">
-                <!-- Year -->
-                <TextView
-                    android:id="@+id/detail_movie_year"
-                    style="?android:attr/textAppearanceLarge"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    tools:text="2015" />
-                <!-- Rating -->
-                <TextView
-                    android:id="@+id/detail_movie_rating"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    tools:text="8/10" />
-            </LinearLayout>
-        </LinearLayout>
+        android:layout_height="match_parent">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:paddingTop="24dp">
+            android:orientation="vertical">
 
-            <android.support.v7.widget.CardView
+            <TextView
+                android:id="@+id/detail_movie_title"
+                style="@style/TitleText"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                tools:text="Fantastic Four" />
+
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="16dp">
-
-                <!-- Description -->
-                <TextView
-                    android:id="@+id/detail_movie_synopsis"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/movie_detail_margin"
-                    tools:text="Description of Fantastic Four" />
-            </android.support.v7.widget.CardView>
-
-            <android.support.v7.widget.CardView
-                android:id="@+id/video_card"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="16dp">
+                android:orientation="horizontal"
+                android:padding="@dimen/movie_detail_margin">
+                <!-- Poster -->
+                <ImageView
+                    android:id="@+id/detail_movie_poster"
+                    android:layout_width="@dimen/image_width"
+                    android:layout_height="185dp"
+                    android:scaleType="centerCrop" />
 
                 <LinearLayout
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="@dimen/movie_detail_margin"
+                    android:layout_weight="1"
+                    android:gravity="center"
                     android:orientation="vertical">
+                    <!-- Year -->
+                    <TextView
+                        android:id="@+id/detail_movie_year"
+                        style="?android:attr/textAppearanceLarge"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        tools:text="2015" />
+                    <!-- Rating -->
+                    <TextView
+                        android:id="@+id/detail_movie_rating"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        tools:text="8/10" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:paddingTop="24dp">
+
+                <android.support.v7.widget.CardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="16dp">
+
+                    <!-- Description -->
+                    <TextView
+                        android:id="@+id/detail_movie_synopsis"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/movie_detail_margin"
+                        tools:text="Description of Fantastic Four" />
+                </android.support.v7.widget.CardView>
+
+                <android.support.v7.widget.CardView
+                    android:id="@+id/video_card"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="16dp">
 
                     <LinearLayout
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical|center_horizontal"
-                        android:orientation="horizontal">
+                        android:orientation="vertical">
 
-                        <ImageButton
-                            android:id="@+id/play_button"
-                            android:layout_width="wrap_content"
+                        <LinearLayout
+                            android:layout_width="fill_parent"
                             android:layout_height="wrap_content"
-                            android:src="@drawable/ic_action_playback_play" />
+                            android:layout_gravity="center_vertical|center_horizontal"
+                            android:orientation="horizontal">
 
-                        <TextView
-                            android:id="@+id/trailer_text"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            tools:text="Trailer 1" />
+                            <ImageButton
+                                android:id="@+id/play_button"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:src="@drawable/ic_action_playback_play" />
+
+                            <TextView
+                                android:id="@+id/trailer_text"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                tools:text="Trailer 1" />
+                        </LinearLayout>
                     </LinearLayout>
-                </LinearLayout>
-            </android.support.v7.widget.CardView>
+                </android.support.v7.widget.CardView>
+            </LinearLayout>
         </LinearLayout>
-    </LinearLayout>
-</ScrollView>
+    </ScrollView>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab_favorite"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right|bottom"
+        android:clickable="true"
+        android:src="@android:drawable/btn_star" />
+</FrameLayout>

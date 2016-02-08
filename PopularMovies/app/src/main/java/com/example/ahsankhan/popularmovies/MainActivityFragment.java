@@ -7,6 +7,7 @@ import android.support.v4.app.Fragment;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,6 +27,9 @@ import java.util.List;
  * A placeholder fragment containing a simple view.
  */
 public class MainActivityFragment extends Fragment {
+
+    private static final String LOG_TAG =
+            DiscoverMovieTask.class.getSimpleName();
 
     private MovieTileAdapter movieTilesAdapter = null;
 
@@ -126,13 +130,17 @@ public class MainActivityFragment extends Fragment {
             }
             return convertView;
         }
-
     }
 
     private class DiscoverMovieTask extends AsyncTask<String, Void, MovieTile[]> {
         @Override
         protected MovieTile[] doInBackground(String...params) {
-            return TheMovieDBUtility.discover(params[0]);
+            String sort_option = params[0];
+            if (sort_option.equals("favorite")) {
+                return TheMovieDBUtility.getFavoriteMovies(getContext());
+            } else {
+                return TheMovieDBUtility.discover(sort_option);
+            }
         }
         @Override
         protected void onPostExecute(MovieTile[] result) {

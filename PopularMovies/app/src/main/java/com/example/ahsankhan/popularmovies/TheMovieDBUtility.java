@@ -1,6 +1,11 @@
 package com.example.ahsankhan.popularmovies;
 
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.Cursor;
 import android.util.Log;
+
+import com.example.ahsankhan.popularmovies.data.MovieContract;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -26,9 +31,9 @@ public class TheMovieDBUtility {
 
     static MovieTile[] discover(String sortBy) {
         String movieJsonStr = NetworkUtility.FetchJson(
-            MOVIE_DISCOVER_BASE_URL,
-            new String[]{SORT_PARAM, API_KEY_PARAM},
-            new String[]{sortBy, BuildConfig.THE_MOVIE_DB_API_KEY});
+                MOVIE_DISCOVER_BASE_URL,
+                new String[]{SORT_PARAM, API_KEY_PARAM},
+                new String[]{sortBy, BuildConfig.THE_MOVIE_DB_API_KEY});
         try {
             return getMovieListFromJson(movieJsonStr);
         } catch(final JSONException e) {
@@ -36,7 +41,67 @@ public class TheMovieDBUtility {
         }
         return null;
     }
-    
+
+    static MovieTile[] getFavoriteMovies(Context context) {
+        // A cursor is your primary interface to the query results.
+        Cursor cursor = context.getContentResolver().query(
+                MovieContract.FavoriteEntry.CONTENT_URI,
+                new String[]{MovieContract.FavoriteEntry.COLUMN_MOVIE_ID},   // projection
+                null,   // selection
+                null,   // Values for the "where" clause
+                null    // sort order
+        );
+        ArrayList<String> movieIds = new ArrayList<>();
+        cursor.moveToFirst();
+        while (!cursor.isAfterLast()) {
+            movieIds.add(cursor.getString(0));
+            cursor.moveToNext();
+        }
+        ArrayList<MovieTile> movieTiles = getMovieDetails(movieIds);
+        return movieTiles.toArray(new MovieTile[movieTiles.size()]);
+    }
+
+    static ArrayList<MovieTile> getMovieDetails(ArrayList<String> movieIds) {
+        // I didn't see any way to get movie details by passing a list of
+        // movie Ids. so getting movie detail one at a time.
+        ArrayList<MovieTile> movieTiles = new ArrayList<>();
+        for (String movieId : movieIds) {
+            movieTiles.add(getDetail(movieId));
+        }
+        return movieTiles;
+    }
+
+    static void addToFavorite(Context context, String movieId, String movieName) {
+        ContentValues values = new ContentValues();
+        values.put(MovieContract.FavoriteEntry.COLUMN_MOVIE_ID, movieId);
+        values.put(MovieContract.FavoriteEntry.COLUMN_MOVIE_NAME, movieName);
+        context.getContentResolver().insert(
+                MovieContract.FavoriteEntry.CONTENT_URI, values
+        );
+    }
+
+    static void removeFromFavorite(Context context, String movieId) {
+        context.getContentResolver().delete(
+                MovieContract.FavoriteEntry.CONTENT_URI,
+                MovieContract.FavoriteEntry.COLUMN_MOVIE_ID + "=?",
+                new String[]{movieId}
+        );
+    }
+
+    static Boolean isFavoriteMovie(Context context, String movieId) {
+        // A cursor is your primary interface to the query results.
+        Cursor cursor = context.getContentResolver().query(
+                MovieContract.FavoriteEntry.CONTENT_URI,
+                null,   // projection
+                MovieContract.FavoriteEntry.COLUMN_MOVIE_ID + " = '" +
+                        movieId + "'",
+                null,   // Values for the "where" clause
+                null    // sort order
+        );
+        cursor.moveToFirst();
+        return !cursor.isAfterLast();
+    }
+
     static MovieTile getDetail(String movieId) {
         String movieJsonStr = NetworkUtility.FetchJson(
             MOVIE_DETAIL_BASE_URL + movieId + "?",

@@ -2,9 +2,7 @@ package com.example.ahsankhan.popularmovies;
 
 
 import android.content.ActivityNotFoundException;
-import android.content.ContentValues;
 import android.content.Intent;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -19,7 +17,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.support.v7.widget.CardView;
 
-import com.example.ahsankhan.popularmovies.data.MovieContract;
 import com.squareup.picasso.Picasso;
 
 
@@ -82,11 +79,11 @@ public class MovieDetailFragment extends Fragment {
                 String status = isInFavorite ?
                         "Removed from favorite" : "Added to favorite";
                 if (isInFavorite) {
-                    removeFromFavorite(movieId);
+                    TheMovieDBUtility.removeFromFavorite(getContext(), movieId);
                 } else {
-                    addToFavorite(movieId, movieName);
+                    TheMovieDBUtility.addToFavorite(getContext(), movieId, movieName);
                 }
-                isInFavorite = isFavoriteMovie(movieId);
+                isInFavorite = TheMovieDBUtility.isFavoriteMovie(getContext(), movieId);
                 Snackbar.make(view, status, Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             }
@@ -95,36 +92,6 @@ public class MovieDetailFragment extends Fragment {
         return rootView;
     }
 
-    Boolean isFavoriteMovie(String movieId) {
-        // A cursor is your primary interface to the query results.
-        Cursor cursor = getContext().getContentResolver().query(
-                MovieContract.FavoriteEntry.CONTENT_URI,
-                null,   // projection
-                MovieContract.FavoriteEntry.COLUMN_MOVIE_ID + " = '" +
-                        movieId + "'",
-                null,   // Values for the "where" clause
-                null    // sort order
-        );
-        cursor.moveToFirst();
-        return !cursor.isAfterLast();
-    }
-
-    void addToFavorite(String movieId, String movieName) {
-        ContentValues values = new ContentValues();
-        values.put(MovieContract.FavoriteEntry.COLUMN_MOVIE_ID, movieId);
-        values.put(MovieContract.FavoriteEntry.COLUMN_MOVIE_NAME, movieName);
-        getContext().getContentResolver().insert(
-                MovieContract.FavoriteEntry.CONTENT_URI, values
-        );
-    }
-
-    void removeFromFavorite(String movieId) {
-        getContext().getContentResolver().delete(
-                MovieContract.FavoriteEntry.CONTENT_URI,
-                MovieContract.FavoriteEntry.COLUMN_MOVIE_ID + "=?",
-                new String[]{movieId}
-        );
-    }
 
     void updateDetail() {
         new FetchMovieDetailTask().execute(movieId);
@@ -151,7 +118,7 @@ public class MovieDetailFragment extends Fragment {
                 trailerKey = trailer.trailerKey;
             }
             movieName = movie.title;
-            isInFavorite = isFavoriteMovie(movie.id);
+            isInFavorite = TheMovieDBUtility.isFavoriteMovie(getContext(), movie.id);
         }
     }
 }

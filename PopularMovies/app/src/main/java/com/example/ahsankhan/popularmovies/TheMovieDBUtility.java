@@ -111,6 +111,7 @@ public class TheMovieDBUtility {
         try {
             movieTile = getMovieDetailFromJson(movieJsonStr);
             movieTile.setTrailers(getTrailers(movieId));
+            movieTile.reviews = getReviews(movieId);
         } catch(final JSONException e) {
             Log.e(LOG_TAG, "Error parsing json", e);
         }
@@ -124,6 +125,14 @@ public class TheMovieDBUtility {
                 new String[]{API_KEY_PARAM},
                 new String[]{BuildConfig.THE_MOVIE_DB_API_KEY});
         return getTrailersFromJson(trailerJsonStr);
+    }
+
+    static ArrayList<String> getReviews(String movieId) throws JSONException {
+        String reviewJsonStr = NetworkUtility.FetchJson(
+                MOVIE_DETAIL_BASE_URL + movieId + "/reviews" + "?",
+                new String[]{API_KEY_PARAM},
+                new String[]{BuildConfig.THE_MOVIE_DB_API_KEY});
+        return getReviewsFromJson(reviewJsonStr);
     }
 
     /*
@@ -188,12 +197,12 @@ public class TheMovieDBUtility {
         final String SITE = "site";
         final String YOUTUBE_SITE = "youtube";
         final String KEY = "key";
-        if (trailerResponse == null) return null;
+        ArrayList<MovieTile.MovieTrailer> trailers = new ArrayList<>();
+        if (trailerResponse == null) return trailers;
         JSONObject responseJson = new JSONObject(trailerResponse);
         JSONArray results = responseJson.getJSONArray(RESULTS);
-        if (results.length() == 0) return null;
-        ArrayList<MovieTile.MovieTrailer> trailers
-                = new ArrayList<>();
+        if (results.length() == 0) return trailers;
+
         for (int i = 0; i < results.length(); i++) {
             JSONObject trailerJson = results.getJSONObject(i);
             if (!TRAILER_TYPE.equalsIgnoreCase(trailerJson.getString(TYPE)) ||
@@ -203,9 +212,10 @@ public class TheMovieDBUtility {
             MovieTile.MovieTrailer trailer = new MovieTile.MovieTrailer(
                     trailerJson.getString(NAME),
                     trailerJson.getString(KEY));
+            if (trailer.trailerName == null || trailer.trailerKey == null)
+                continue;
             trailers.add(trailer);
         }
-        if (trailers.size() == 0) return null;
         return trailers;
     }
 
@@ -259,6 +269,64 @@ public class TheMovieDBUtility {
                                  movieJson.getString("vote_average") + "/10",
                                  movieJson.getString("overview"));
        return movieTile;
+    }
+
+    /*
+    JSON format:
+    {
+  " id": 49026,
+    "page": 1,
+    "results": [
+     {
+      "id": "5010553819c2952d1b000451",
+      "author": "Travis Bell",
+      "content": "I felt like this was a tremendous....... They are damn near perfect.",
+      "url": "http://j.mp/QSjAK2"
+    },
+    {
+      "id": "5013bc76760ee372cb00253e",
+      "author": "Chris",
+      "content": "I personally thought this film is on par if not better than...
+        .\r\n\r\nStupendously good film in my opinion.",
+      "url": "http://j.mp/P18dg1"
+    },
+   ],
+  "total_pages": 1,
+  "total_results": 2
+}
+     */
+
+    static private ArrayList<String> getReviewsFromJson(String reviewJsonStr) throws JSONException {
+        final String RESULTS = "results";
+        final String CONTENT = "content";
+        final int MAXLENGTH = 100;
+        final int MINLENGTH = 20;
+
+        ArrayList<String> reviews = new ArrayList<>();
+
+        if (reviewJsonStr == null) return reviews;
+        JSONObject responseJson = new JSONObject(reviewJsonStr);
+        JSONArray results = responseJson.getJSONArray(RESULTS);
+        if (results.length() == 0) return reviews;
+        // Get complete sentences with maximum length of MAXLENGTH
+        for (int i = 0; i < results.length(); i++) {
+            JSONObject resultJson = results.getJSONObject(i);
+            String review = review = resultJson.getString(CONTENT);
+            if (review.length() > MAXLENGTH) {
+                int length = MAXLENGTH;
+                for (int j = MAXLENGTH; j > MINLENGTH; j--) {
+                    char ch = review.charAt(j);
+                    if (ch == '.' || ch == '\r' || ch == '\n') {
+                        length = j;
+                        break;
+                    }
+                }
+                review = review.substring(0, length);
+            }
+            reviews.add(review);
+        }
+        return reviews;
+
     }
 
    static private String getYear(String date) {

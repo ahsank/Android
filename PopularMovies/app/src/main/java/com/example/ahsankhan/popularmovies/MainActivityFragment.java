@@ -72,7 +72,6 @@ public class MainActivityFragment extends Fragment {
         return rootView;
     }
 
-
     @Override
     public void onSaveInstanceState(Bundle outState) {
         if (movieTilesAdapter != null) {
@@ -142,6 +141,7 @@ public class MainActivityFragment extends Fragment {
                 return TheMovieDBUtility.discover(sort_option);
             }
         }
+
         @Override
         protected void onPostExecute(MovieTile[] result) {
             if (result == null) return;

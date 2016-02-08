@@ -27,7 +27,8 @@ public class MovieTile implements Parcelable {
     String releaseYear;
     String movieRating;
     String movieSummary;
-    ArrayList<MovieTrailer> movieTrailers;
+    ArrayList<MovieTrailer> movieTrailers = new ArrayList<>();
+    ArrayList<String> reviews = new ArrayList<>();
 
     private MovieTile(Parcel in) {
         id = in.readString();
@@ -37,6 +38,7 @@ public class MovieTile implements Parcelable {
         movieRating = in.readString();
         movieSummary = in.readString();
         in.readTypedList(movieTrailers, MovieTrailer.CREATOR);
+        in.readStringList(reviews);
     }
 
     public MovieTile(String id, String title, String posterPath) {
@@ -70,6 +72,7 @@ public class MovieTile implements Parcelable {
         dest.writeString(movieRating);
         dest.writeString(movieSummary);
         dest.writeTypedList(movieTrailers);
+        dest.writeStringList(reviews);
     }
 
     public static class MovieTrailer implements Parcelable {

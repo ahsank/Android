@@ -1,6 +1,7 @@
 package com.example.ahsankhan.popularmovies;
 
 
+import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.net.Uri;
@@ -9,21 +10,30 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.support.v7.widget.CardView;
 
 import com.squareup.picasso.Picasso;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
  * A {@link Fragment} subclass to show movie details.
  */
 public class MovieDetailFragment extends Fragment {
+
+    private static final String LOG_TAG =
+            MovieDetailFragment.class.getSimpleName();
 
     TextView movieTitle = null;
     ImageView moviePoster = null;
@@ -32,11 +42,10 @@ public class MovieDetailFragment extends Fragment {
     TextView movieSynopsis = null;
     String movieId = null;
     CardView trailerCardView = null;
-    TextView trailerText = null;
-    String trailerKey = null;
-    ImageButton playTrailerButton = null;
     Boolean isInFavorite = false;
     String movieName;
+    MovieTrailerAdapter trailerAdapter = null;
+    ArrayAdapter<String> reviewAdapter = null;
 
     public MovieDetailFragment() {
         // Required empty public constructor
@@ -55,23 +64,19 @@ public class MovieDetailFragment extends Fragment {
         movieSynopsis = (TextView) rootView.findViewById(R.id.detail_movie_synopsis);
         movieId = getActivity().getIntent().getStringExtra(Intent.EXTRA_TEXT);
         trailerCardView = (CardView) rootView.findViewById(R.id.video_card);
-        trailerText = (TextView) rootView.findViewById(R.id.trailer_text);
-        playTrailerButton = (ImageButton) rootView.findViewById(R.id.play_button);
-        playTrailerButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // From:stackoverflow.com/questions/574195/android-youtube-app-play-video-intent
-                try {
-                    Intent intent = new Intent(Intent.ACTION_VIEW,
-                            Uri.parse("vnd.youtube:" + trailerKey));
-                    startActivity(intent);
-                } catch (ActivityNotFoundException ex) {
-                    Intent intent = new Intent(Intent.ACTION_VIEW,
-                            Uri.parse("http://www.youtube.com/watch?v=" + trailerKey));
-                    startActivity(intent);
-                }
-            }
-        });
+
+        // Movie trailers
+        trailerAdapter = new MovieTrailerAdapter(getActivity(),
+                new ArrayList<MovieTile.MovieTrailer>());
+        ListView trailerList = (ListView) rootView.findViewById(R.id.trailers_listview);
+        trailerList.setAdapter(this.trailerAdapter);
+
+        // Reviews
+        reviewAdapter = new ArrayAdapter<String>(getContext(),
+                R.layout.review_item, R.id.review_text);
+        ListView reviewList = (ListView) rootView.findViewById(R.id.review_listview);
+        reviewList.setAdapter(reviewAdapter);
+
         FloatingActionButton fab = (FloatingActionButton) rootView.findViewById(R.id.fab_favorite);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -97,6 +102,52 @@ public class MovieDetailFragment extends Fragment {
         new FetchMovieDetailTask().execute(movieId);
     }
 
+    public static class MovieTrailerAdapter extends ArrayAdapter<MovieTile.MovieTrailer> {
+        private static final String LOG_TAG =
+                MovieTrailerAdapter.class.getSimpleName();
+
+        public MovieTrailerAdapter(Activity context, ArrayList<MovieTile.MovieTrailer> trailers) {
+            super(context, 0, trailers);
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            // Gets the AndroidFlavor object from the ArrayAdapter at
+            // the appropriate position
+            final MovieTile.MovieTrailer trailer = getItem(position);
+
+            if (convertView == null) {
+                convertView = LayoutInflater.from(getContext()).inflate(
+                        R.layout.movie_trailer_item, parent, false);
+            }
+            if (convertView == null) return null;
+            Log.v(LOG_TAG, "added view");
+            Log.v(LOG_TAG, "Trailer text " + trailer.trailerName);
+            TextView trailerText = (TextView) convertView.findViewById(R.id.trailer_text);
+            ImageButton playTrailerButton = (ImageButton) convertView.findViewById(
+                    R.id.play_button);
+            trailerText.setText(trailer.trailerName);
+            playTrailerButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // From:stackoverflow.com/questions/574195/android-youtube-app-play-video-intent
+                    String trailerKey = trailer.trailerKey;
+                    try {
+                        Intent intent = new Intent(Intent.ACTION_VIEW,
+                                Uri.parse("vnd.youtube:" + trailerKey));
+                        getContext().startActivity(intent);
+                    } catch (ActivityNotFoundException ex) {
+                        Intent intent = new Intent(Intent.ACTION_VIEW,
+                                Uri.parse("http://www.youtube.com/watch?v=" + trailerKey));
+                        getContext().startActivity(intent);
+                    }
+                }
+            });
+            return convertView;
+        }
+
+    }
+
     private class FetchMovieDetailTask extends AsyncTask<String, Void, MovieTile> {
         @Override
         protected MovieTile doInBackground(String... params) {
@@ -112,11 +163,16 @@ public class MovieDetailFragment extends Fragment {
             MovieDetailFragment.this.movieYear.setText(movie.releaseYear);
             MovieDetailFragment.this.movieRating.setText(movie.movieRating);
             MovieDetailFragment.this.movieSynopsis.setText(movie.movieSummary);
-            if (movie.movieTrailers != null && movie.movieTrailers.size() > 0) {
-                MovieTile.MovieTrailer trailer = movie.movieTrailers.get(0);
-                trailerText.setText(trailer.trailerName);
-                trailerKey = trailer.trailerKey;
+            if (movie.movieTrailers != null) {
+                Log.v(LOG_TAG, "Aded trailers " + movie.movieTrailers.size());
+            } else {
+                Log.v(LOG_TAG, "No trailers");
             }
+            trailerAdapter.clear();
+            trailerAdapter.addAll(movie.movieTrailers);
+            reviewAdapter.clear();
+            reviewAdapter.addAll(movie.reviews);
+
             movieName = movie.title;
             isInFavorite = TheMovieDBUtility.isFavoriteMovie(getContext(), movie.id);
         }

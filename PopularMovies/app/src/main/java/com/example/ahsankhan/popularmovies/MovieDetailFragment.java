@@ -32,9 +32,9 @@ import java.util.List;
  */
 public class MovieDetailFragment extends Fragment {
 
+    static final String MOVIE_ID = "MOVIE_ID";
     private static final String LOG_TAG =
             MovieDetailFragment.class.getSimpleName();
-
     TextView movieTitle = null;
     ImageView moviePoster = null;
     TextView movieYear = null;
@@ -57,12 +57,20 @@ public class MovieDetailFragment extends Fragment {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_movie_detail,
                 container, false);
+
+        Bundle arguments = getArguments();
+        if (arguments != null) {
+            movieId = arguments.getString(MovieDetailFragment.MOVIE_ID);
+            Log.v(LOG_TAG, "Got movie Id" + movieId);
+        } else {
+            Log.v(LOG_TAG, "NO arguments");
+        }
+
         movieTitle = (TextView) rootView.findViewById(R.id.detail_movie_title);
         moviePoster = (ImageView) rootView.findViewById(R.id.detail_movie_poster);
         movieYear = (TextView) rootView.findViewById(R.id.detail_movie_year);
         movieRating = (TextView) rootView.findViewById(R.id.detail_movie_rating);
         movieSynopsis = (TextView) rootView.findViewById(R.id.detail_movie_synopsis);
-        movieId = getActivity().getIntent().getStringExtra(Intent.EXTRA_TEXT);
         trailerCardView = (CardView) rootView.findViewById(R.id.video_card);
 
         // Movie trailers
@@ -121,8 +129,6 @@ public class MovieDetailFragment extends Fragment {
                         R.layout.movie_trailer_item, parent, false);
             }
             if (convertView == null) return null;
-            Log.v(LOG_TAG, "added view");
-            Log.v(LOG_TAG, "Trailer text " + trailer.trailerName);
             TextView trailerText = (TextView) convertView.findViewById(R.id.trailer_text);
             ImageButton playTrailerButton = (ImageButton) convertView.findViewById(
                     R.id.play_button);

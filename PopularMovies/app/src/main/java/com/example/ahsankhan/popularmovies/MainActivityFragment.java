@@ -41,6 +41,7 @@ public class MainActivityFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main,
                                          container, false);
+
         this.movieTilesAdapter = new MovieTileAdapter(getActivity(),
                 new ArrayList<MovieTile>());
 
@@ -51,12 +52,9 @@ public class MainActivityFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> adapterView,
                                     View view, int position, long l) {
+                Log.v(LOG_TAG, "Gridview clicked");
                 MovieTile movieTile = movieTilesAdapter.getItem(position);
-
-                Intent detailIntent = new Intent(getActivity(),
-                        MovieDetailActivity.class)
-                        .putExtra(Intent.EXTRA_TEXT, movieTile.id);
-                startActivity(detailIntent);
+                ((MainActivity) getActivity()).onItemSelected(movieTile.id);
             }
         });
 
